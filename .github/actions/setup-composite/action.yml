@@ -1,0 +1,29 @@
+name: 'PC-lint Plus Action'
+description: |
+  'Like a compiler, PC-lint Plus parses your source code files, performs
+  semantic analysis, and builds an abstract syntax tree to represent your program.'
+inputs:
+  install-dir:
+    description: 'PC-lint Plus install directory'
+    required: true
+    type: string
+  license:
+    description: "PC-lint Plus SE license"
+    required: true
+    type: string
+runs:
+  using: "composite"
+  steps:
+    - name: Get license
+      run: |
+        mkdir -p ${{ inputs.install-dir }}/pclp &&
+        echo '${{ inputs.license }}' > ${{ inputs.install-dir }}/pclp/license.lic
+      shell: bash
+
+    - name: Install PC-lint Plus
+      run: |
+        curl -O https://pclintplus.com/storage/2024/03/pclp.linux.2.1.tar.gz &&
+        tar xf pclp.linux.2.1.tar.gz -C ${{ inputs.install-dir }} &&
+        ${{ inputs.install-dir }}/pclp/pclp64_linux -v
+      shell: bash
+
