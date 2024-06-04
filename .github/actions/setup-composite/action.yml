@@ -11,6 +11,19 @@ inputs:
     description: "PC-lint Plus SE license"
     required: true
     type: string
+  compiler:
+    description: "Compiler type"
+    required: true
+    type: string
+  compiler-bin:
+    description: "Compiler binary"
+    required: true
+    type: string
+  args:
+    description: "Command-line arguments"
+    required: false
+    type: string
+
 runs:
   using: "composite"
   steps:
@@ -27,3 +40,16 @@ runs:
         ${{ inputs.install-dir }}/pclp/pclp64_linux -v
       shell: bash
 
+    - name: Configure PC-lint Plus
+      run: |
+        python ${{ inputs.install-dir }}/pclp/config/pclp_config.py \
+          --compiler=${{ inputs.compiler }}                         \
+          --compiler-bin=${{ inputs.compiler-bin }}                 \
+          --config-output-lnt-file=compiler.lnt                     \
+          --config-output-header-file=compiler.h                    \
+          --generate-compiler-config
+      shell: bash
+
+    - name: Analyze
+      run: ${{ inputs.install-dir }}/pclp/pclp64_linux -i${{ inputs.install-dir }}/pclp/config compiler.lnt ${{ inputs.args }}
+      shell: bash
