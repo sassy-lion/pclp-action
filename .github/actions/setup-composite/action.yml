@@ -23,6 +23,14 @@ inputs:
     description: "Command-line arguments"
     required: false
     type: string
+  log:
+    description: "File name where lint results are logged"
+    required: true
+    type: string
+  uniqueId:
+    description: "upload-artifact@v4 requires unique ID for each iteration."
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -51,5 +59,14 @@ runs:
       shell: bash
 
     - name: Analyze
-      run: ${{ inputs.install-dir }}/pclp/pclp64_linux -i${{ inputs.install-dir }}/pclp/config compiler.lnt ${{ inputs.args }}
+      run: |
+        ${{ inputs.install-dir }}/pclp/pclp64_linux -i${{ inputs.install-dir }}/pclp/config compiler.lnt ${{ inputs.args }} | tee ${{ inputs.log }}
       shell: bash
+
+    - name: Publish results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Analyzer results (${{ inputs.uniqueId }})
+        path: ${{ inputs.log }}
+  
